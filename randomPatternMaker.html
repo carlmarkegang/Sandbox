@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <canvas id="canvas" style="box-shadow: 1px 1px 31px #929292;image-rendering: pixelated;"></canvas>
+    <script>
+        var canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+        var ctx = canvas.getContext("2d");
+
+
+        window.addEventListener('keydown', function (e) {
+            keysDown[e.keyCode] = true;
+            update();
+        });
+        window.addEventListener('keyup', function (e) {
+            delete keysDown[e.keyCode];
+        });
+
+        // Object
+        var objectSize = 10;
+
+        // X
+        var posX = -50;
+        var posXDirection = "right";
+        var xSpeed = Math.floor(Math.random() * 10)+1;
+
+        // Y
+        var posY = -100;
+        var posYDirection = "down";
+        var ySpeed = Math.floor(Math.random() * 10)+1;
+
+        // Color
+        var colorR = 0;
+        var colorG = 0;
+        var colorB = 0;
+        randomizeColor();
+
+
+        function draw() {
+            ctx.fillStyle = "rgb(" + colorR + "," + colorB + "," + colorG + ")";
+            ctx.fillRect(posX, posY, objectSize, objectSize);
+
+            if (posX >= canvas.width - objectSize) {
+                posXDirection = "left";
+                randomizeColor();
+            }
+
+            if (posX <= 0) {
+                posXDirection = "right";
+                randomizeColor();
+            }
+
+            if (posXDirection == "right") {
+                posX += xSpeed;
+            }
+
+            if (posXDirection == "left") {
+                posX -= xSpeed;
+            }
+
+            if (posY >= canvas.width) {
+                posY = -objectSize;
+            }
+
+            if (posYDirection == "down") {
+                posY += ySpeed;
+            }
+
+            if (posYDirection == "up") {
+                posY -= ySpeed;
+            }
+
+        }
+
+        function randomizeColor() {
+            colorR = Math.floor(Math.random() * 255);
+            colorG = Math.floor(Math.random() * 255);
+            colorB = Math.floor(Math.random() * 255);
+        }
+
+
+        var drawInterval = setInterval(draw, 1);
+
+
+
+
+    </script>
+
+
+</body>
+</html>
