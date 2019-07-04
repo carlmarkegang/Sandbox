@@ -23,12 +23,12 @@
         var objectSize = 10;
 
         // X
-        var posX = -50;
+        var posX = Math.floor(Math.random() * canvas.width);
         var posXDirection = "right";
         var xSpeed = Math.floor(Math.random() * 10)+1;
 
         // Y
-        var posY = -100;
+        var posY = -200;
         var posYDirection = "down";
         var ySpeed = Math.floor(Math.random() * 10)+1;
 
@@ -38,9 +38,18 @@
         var colorB = 0;
         randomizeColor();
 
+        // Speed
+        var DrawSpeed = Math.floor(Math.random() * 100)+1;
+
 
         function draw() {
-            ctx.fillStyle = "rgb(" + colorR + "," + colorB + "," + colorG + ")";
+            drawForLoop();
+            return;
+        }
+		
+		function drawForLoop(){
+		for (i = 0; i < DrawSpeed; i++) { 
+		            ctx.fillStyle = "rgb(" + colorR + "," + colorB + "," + colorG + ")";
             ctx.fillRect(posX, posY, objectSize, objectSize);
 
             if (posX >= canvas.width - objectSize) {
@@ -72,8 +81,9 @@
             if (posYDirection == "up") {
                 posY -= ySpeed;
             }
-
-        }
+			}
+		
+		}
 
         function randomizeColor() {
             colorR = Math.floor(Math.random() * 255);
@@ -83,9 +93,6 @@
 
 
         var drawInterval = setInterval(draw, 1);
-
-
-
 
     </script>
 
