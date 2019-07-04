@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <canvas id="canvas" style="border:1px solid grey;image-rendering: pixelated;"></canvas>
+    <script>
+        var canvas = document.getElementById("canvas");
+        canvas.width = 700;
+        canvas.height = 500;
+        var ctx = canvas.getContext("2d");
+
+
+        window.addEventListener('keydown', function (e) {
+            keysDown[e.keyCode] = true;
+            update();
+        });
+        window.addEventListener('keyup', function (e) {
+            delete keysDown[e.keyCode];
+        });
+
+        // Object
+        var objectSize = 20;
+
+        // X
+        var posX = 100;
+        var posXDirection = "right";
+        var xSpeed = 0;
+
+        // Y
+        var posY = 10;
+        var posYDirection = "down";
+        var ySpeed = 0;
+
+        // Color
+        var colorR = 0;
+        var colorG = 0;
+        var colorB = 0;
+        var colorAlpha = Math.random() * (1 - 0.5) + 0.5;
+        randomizeColor();
+
+        // Speed
+        var DrawSpeed = Math.floor(Math.random() * 100) + 1;
+
+
+        function draw() {
+            drawForLoop();
+            return;
+        }
+
+        function drawForLoop() {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (i = 0; i < 1; i++) {
+                ctx.fillStyle = "rgba(" + colorR + "," + colorB + "," + colorG + "," + colorAlpha + ")";
+                ctx.fillRect(posX, posY, objectSize, objectSize);
+
+                if (posX >= canvas.width - objectSize) {
+                    posXDirection = "left";
+                    randomizeColor();
+                }
+
+                if (posX <= 0) {
+                    posXDirection = "right";
+                    randomizeColor();
+                }
+
+                if (posXDirection == "right") {
+                    posX += xSpeed;
+                }
+
+                if (posXDirection == "left") {
+                    posX -= xSpeed;
+                }
+
+                if (posY <= 0) {
+                    posYDirection = "down";
+                }
+
+                if (posY >= canvas.height - objectSize) {
+                    posYDirection = "up";
+                }
+
+                if (posYDirection == "down") {
+                    posY += ySpeed;
+                }
+
+                if (posYDirection == "up") {
+                    posY -= ySpeed;
+                }
+            }
+
+        }
+
+        function randomizeColor() {
+            colorR = Math.floor(Math.random() * 255);
+            colorG = Math.floor(Math.random() * 255);
+            colorB = Math.floor(Math.random() * 255);
+        }
+
+
+        var drawInterval = setInterval(draw, 20);
+        var updateposIntervall = setInterval(updatePos, 1000);
+        function updatePos() {
+            ySpeed = Math.floor(Math.random() * 2);
+            xSpeed = Math.floor(Math.random() * 2);
+        }
+
+
+    </script>
+
+
+</body>
+</html>
