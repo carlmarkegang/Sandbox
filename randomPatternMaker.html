@@ -6,7 +6,7 @@
     <canvas id="canvas" style="box-shadow: 1px 1px 31px #929292;image-rendering: pixelated;"></canvas>
     <script>
         var canvas = document.getElementById("canvas");
-        canvas.width = 500;
+        canvas.width = 700;
         canvas.height = 500;
         var ctx = canvas.getContext("2d");
 
@@ -25,65 +25,66 @@
         // X
         var posX = Math.floor(Math.random() * canvas.width);
         var posXDirection = "right";
-        var xSpeed = Math.floor(Math.random() * 10)+1;
+        var xSpeed = Math.floor(Math.random() * 10) + 1;
 
         // Y
         var posY = -200;
         var posYDirection = "down";
-        var ySpeed = Math.floor(Math.random() * 10)+1;
+        var ySpeed = Math.floor(Math.random() * 10) + 5;
 
         // Color
         var colorR = 0;
         var colorG = 0;
         var colorB = 0;
+        var colorAlpha = Math.random() * (1 - 0.5) + 0.5;
         randomizeColor();
 
         // Speed
-        var DrawSpeed = Math.floor(Math.random() * 100)+1;
+        var DrawSpeed = Math.floor(Math.random() * 100) + 1;
 
 
         function draw() {
             drawForLoop();
             return;
         }
-		
-		function drawForLoop(){
-		for (i = 0; i < DrawSpeed; i++) { 
-		            ctx.fillStyle = "rgb(" + colorR + "," + colorB + "," + colorG + ")";
-            ctx.fillRect(posX, posY, objectSize, objectSize);
 
-            if (posX >= canvas.width - objectSize) {
-                posXDirection = "left";
-                randomizeColor();
+        function drawForLoop() {
+            for (i = 0; i < DrawSpeed; i++) {
+                ctx.fillStyle = "rgba(" + colorR + "," + colorB + "," + colorG + "," + colorAlpha + ")";
+                ctx.fillRect(posX, posY, objectSize, objectSize);
+
+                if (posX >= canvas.width - objectSize) {
+                    posXDirection = "left";
+                    randomizeColor();
+                }
+
+                if (posX <= 0) {
+                    posXDirection = "right";
+                    randomizeColor();
+                }
+
+                if (posXDirection == "right") {
+                    posX += xSpeed;
+                }
+
+                if (posXDirection == "left") {
+                    posX -= xSpeed;
+                }
+
+                if (posY >= canvas.height) {
+                    posY = -objectSize;
+                }
+
+                if (posYDirection == "down") {
+                    posY += ySpeed;
+                }
+
+                if (posYDirection == "up") {
+                    posY -= ySpeed;
+                }
             }
 
-            if (posX <= 0) {
-                posXDirection = "right";
-                randomizeColor();
-            }
-
-            if (posXDirection == "right") {
-                posX += xSpeed;
-            }
-
-            if (posXDirection == "left") {
-                posX -= xSpeed;
-            }
-
-            if (posY >= canvas.width) {
-                posY = -objectSize;
-            }
-
-            if (posYDirection == "down") {
-                posY += ySpeed;
-            }
-
-            if (posYDirection == "up") {
-                posY -= ySpeed;
-            }
-			}
-		
-		}
+        }
 
         function randomizeColor() {
             colorR = Math.floor(Math.random() * 255);
