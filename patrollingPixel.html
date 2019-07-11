@@ -10,20 +10,11 @@
         canvas.height = 500;
         var ctx = canvas.getContext("2d");
 
-
-        window.addEventListener('keydown', function (e) {
-            keysDown[e.keyCode] = true;
-            update();
-        });
-        window.addEventListener('keyup', function (e) {
-            delete keysDown[e.keyCode];
-        });
-
         // Object
         var objectSize = 20;
 
         // X
-        var posX = 100;
+        var posX = 50;
         var posXDirection = "right";
         var xSpeed = 0;
 
@@ -36,12 +27,13 @@
         var colorR = 0;
         var colorG = 0;
         var colorB = 0;
-        var colorAlpha = Math.random() * (1 - 0.5) + 0.5;
-        randomizeColor();
+        var colorAlpha = 1;
 
-        // Speed
-        var DrawSpeed = Math.floor(Math.random() * 100) + 1;
-
+        //Block
+        var blockX = 100;
+        var blockY = 100;
+        var blockW = 200;
+        var blockH = 200;
 
         function draw() {
             drawForLoop();
@@ -56,30 +48,21 @@
                 ctx.fillStyle = "rgba(" + colorR + "," + colorB + "," + colorG + "," + colorAlpha + ")";
                 ctx.fillRect(posX, posY, objectSize, objectSize);
 
-                if (posX >= canvas.width - objectSize) {
-                    posXDirection = "left";
-                    randomizeColor();
-                }
+                ctx.fillStyle = "grey";
+                ctx.fillRect(blockX, blockY, blockW, blockH);
 
-                if (posX <= 0) {
-                    posXDirection = "right";
-                    randomizeColor();
-                }
+                // Collided
+                isBlockCollided();
+                isSidesCollided();
 
+
+                // Movement direction
                 if (posXDirection == "right") {
                     posX += xSpeed;
                 }
 
                 if (posXDirection == "left") {
                     posX -= xSpeed;
-                }
-
-                if (posY <= 0) {
-                    posYDirection = "down";
-                }
-
-                if (posY >= canvas.height - objectSize) {
-                    posYDirection = "up";
                 }
 
                 if (posYDirection == "down") {
@@ -99,14 +82,63 @@
             colorB = Math.floor(Math.random() * 255);
         }
 
-
-        var drawInterval = setInterval(draw, 20);
-        var updateposIntervall = setInterval(updatePos, 1000);
         function updatePos() {
             ySpeed = Math.floor(Math.random() * 2);
             xSpeed = Math.floor(Math.random() * 2);
         }
 
+        function isBlockCollided() {
+            if (posX < blockX + blockW && posX + objectSize > blockX &&
+                posY < blockY + blockH && posY + objectSize > blockY) {
+                getLocationOfCollision();
+            }
+        }
+
+        function getLocationOfCollision() {
+            if ((posY + objectSize > blockY) && (posY + objectSize < blockY + (blockH / 2))) {
+                posYDirection = "up";
+                //console.log("top");
+            }
+
+            if (posY + (objectSize / 2) > blockY + (blockH / 2)) {
+                posYDirection = "down";
+                //console.log("bottom");
+            }
+
+            if ((posX + objectSize > blockX) && (posX + objectSize < blockX + (blockW / 2))) {
+                posXDirection = "left";
+                //console.log("left");
+            }
+
+            if (posX + (objectSize / 2) > blockX + (blockW / 2)) {
+                posXDirection = "right";
+                //console.log("right");
+            }
+
+        }
+
+        function isSidesCollided() {
+            if (posX >= canvas.width - objectSize) {
+                posXDirection = "left";
+                randomizeColor();
+            }
+
+            if (posX <= 0) {
+                posXDirection = "right";
+                randomizeColor();
+            }
+
+            if (posY <= 0) {
+                posYDirection = "down";
+            }
+
+            if (posY >= canvas.height - objectSize) {
+                posYDirection = "up";
+            }
+        }
+
+        var drawInterval = setInterval(draw, 10);
+        var updateposIntervall = setInterval(updatePos, 1000);
 
     </script>
 
