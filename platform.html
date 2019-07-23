@@ -4,11 +4,14 @@
 </head>
 <body style="font-family:sans-serif;margin:0;">
     <canvas id="canvas" style="border: 1px solid black;image-rendering: pixelated;" onclick=""></canvas>
+    <script src="collisions.js" type="text/javascript"></script>
     <script>
         var canvas = document.getElementById("canvas");
         canvas.width = 800;
         canvas.height = 800;
         var ctx = canvas.getContext("2d");
+
+        var background1 = new Image(); background1.src = 'test.png';
 
         var mouseX = 0;
         var mouseY = 0;
@@ -16,10 +19,22 @@
         var placeBlockSizeWidth = 50;
         var placeBlockSizeHeight = 50;
 
+        var blocks = [];
         var playerBlocks = [];
         var bounceBlocks = [];
-        var blocks = [];
+        var triggerBlocks = [];
+
         var keysDown = {};
+
+        function create_block(x, y, width, height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = "rgb(255, 102, 102)";
+        }
+
+
 
         function create_player(x, y) {
             this.x = x;
@@ -29,10 +44,10 @@
             this.width = 20;
             this.height = 20;
             this.hittingGround = 0;
-            this.speed = 0.2;
+            this.speed = 2;
             this.jumpPower = 5;
         }
-        playerBlocks.push(new create_player(70, canvas.height - 100));
+
 
         function create_bounceBlocks(x, y, width, height, directionX, directionY) {
             this.x = x;
@@ -47,18 +62,19 @@
             this.speed = 1;
         }
 
-        function create_block(x, y, width, height) {
+
+
+        function create_trigger(x, y, width, height, type, option) {
             this.x = x;
             this.y = y;
             this.width = width;
             this.height = height;
-            this.color = "rgb(255, 102, 102)";
+            this.color = "green";
+            this.type = type;
+            this.option = option;
+
         }
-        // Map 1
-        blocks.push(new create_block(0, 0, canvas.width, 50));
-        blocks.push(new create_block(0, 0, 50, canvas.width));
-        blocks.push(new create_block(canvas.width - 50, 0, 50, canvas.height));
-        blocks.push(new create_block(0, canvas.width - 50, canvas.width, 50));
+
 
         window.addEventListener('keydown', function (e) {
             if (e.keyCode == 32 || e.keyCode == 38) {
@@ -77,12 +93,12 @@
         function update() {
             if (37 in keysDown) {
                 // left
-                playerBlocks[0].velX -= playerBlocks[0].speed;
+                playerBlocks[0].x -= playerBlocks[0].speed;
             }
 
             if (39 in keysDown) {
                 // right
-                playerBlocks[0].velX += playerBlocks[0].speed;
+                playerBlocks[0].x += playerBlocks[0].speed;
             }
 
         }
@@ -90,6 +106,8 @@
         function draw() {
             ctx.fillStyle = "#f4f4f4";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            //ctx.drawImage(background1, 0, 0);
 
             // bounceBlocks //
             for (var i = 0; i < bounceBlocks.length; i++) {
@@ -130,6 +148,19 @@
 
             }
 
+            // triggerBlocks //
+            for (var i = 0; i < triggerBlocks.length; i++) {
+                ctx.fillStyle = triggerBlocks[i].color;
+                ctx.fillRect(
+                    triggerBlocks[i].x,
+                    triggerBlocks[i].y,
+                    triggerBlocks[i].width,
+                    triggerBlocks[i].height
+                );
+
+            }
+
+            ctx.fillStyle = "grey";
             // Mouse //
             ctx.fillRect(
                 mouseX,
@@ -154,6 +185,7 @@
             resetObjectIfOutsideMap(playerBlocks[0])
             collideBlock(playerBlocks[0])
             collideBlockBouncePlayer(playerBlocks[0])
+            collideTriggerBlockPlayer(playerBlocks[0])
 
 
             if (playerBlocks[0].hittingGround == 0) {
@@ -170,160 +202,7 @@
             return Math.floor(Math.random() * 255);
         }
 
-        function collideBlock(rect) {
-            rect.hittingGround = 0
-            for (i = 0; i < blocks.length; i++) {
-                var cx = blocks[i].x + blocks[i].width * 0.5;
-                var cy = blocks[i].y + blocks[i].height * 0.5;
-                var rectCx = rect.x + rect.width * 0.5;
-                var rectCy = rect.y + rect.height * 0.5;
 
-                var dx = rectCx - cx;// x difference between centers
-                var dy = rectCy - cy;// y difference between centers
-                var aw = (rect.width + blocks[i].width) * 0.5;// average width
-                var ah = (rect.height + blocks[i].height) * 0.5;// average height
-
-
-                if (Math.abs(dx) > aw || Math.abs(dy) > ah) {
-                    continue
-                }
-
-                if (Math.abs(dx / blocks[i].width) > Math.abs(dy / blocks[i].height)) {
-
-                    if (dx < 0) {
-                        rect.x = blocks[i].x - rect.width;// left
-                        continue
-                    }
-                    else {
-                        rect.x = blocks[i].x + blocks[i].width; // right
-                        continue
-                    }
-
-                } else {
-
-                    if (dy < 0) {
-                        rect.y = blocks[i].y - rect.height; // top
-                        if (rect.velY > 0) {
-                            rect.velY = 0;
-                        }
-                        rect.hittingGround = 1;
-                        continue
-                    }
-                    else {
-                        rect.y = blocks[i].y + blocks[i].height; // bottom
-                        if (rect.velY < -0.5) {
-                            rect.velY = -0.5;
-                        }
-                        continue
-                    }
-
-                }
-            }
-        }
-
-        function collideBlockBouncePlayer(rect) {
-            for (i = 0; i < bounceBlocks.length; i++) {
-                var cx = bounceBlocks[i].x + bounceBlocks[i].width * 0.5;
-                var cy = bounceBlocks[i].y + bounceBlocks[i].height * 0.5;
-                var rectCx = rect.x + rect.width * 0.5;
-                var rectCy = rect.y + rect.height * 0.5;
-
-                var dx = rectCx - cx;// x difference between centers
-                var dy = rectCy - cy;// y difference between centers
-                var aw = (rect.width + bounceBlocks[i].width) * 0.5;// average width
-                var ah = (rect.height + bounceBlocks[i].height) * 0.5;// average height
-
-
-                if (Math.abs(dx) > aw || Math.abs(dy) > ah) {
-                    continue
-                }
-
-                if (Math.abs(dx / bounceBlocks[i].width) > Math.abs(dy / bounceBlocks[i].height)) {
-
-                    if (dx < 0) {
-                        rect.x = bounceBlocks[i].x - rect.width;// left
-                        continue
-                    }
-                    else {
-                        rect.x = bounceBlocks[i].x + bounceBlocks[i].width; // right
-                        continue
-                    }
-
-                } else {
-
-                    if (dy < 0) {
-                        rect.y = bounceBlocks[i].y - rect.height; // top
-                        if (rect.velY > 0) {
-                            rect.velY = 0;
-                        }
-                        rect.hittingGround = 1;
-                        continue
-                    }
-                    else {
-                        rect.y = bounceBlocks[i].y + bounceBlocks[i].height; // bottom
-                        if (rect.velY < -0.5) {
-                            rect.velY = -0.5;
-                        }
-                        continue
-                    }
-
-                }
-            }
-        }
-
-        function collideBlockBounce(rect) {
-            rect.hittingGround = 0
-            for (i = 0; i < blocks.length; i++) {
-                var cx = blocks[i].x + blocks[i].width * 0.5;
-                var cy = blocks[i].y + blocks[i].height * 0.5;
-                var rectCx = rect.x + rect.width * 0.5;
-                var rectCy = rect.y + rect.height * 0.5;
-
-                var dx = rectCx - cx;// x difference between centers
-                var dy = rectCy - cy;// y difference between centers
-                var aw = (rect.width + blocks[i].width) * 0.5;// average width
-                var ah = (rect.height + blocks[i].height) * 0.5;// average height
-
-
-                if (Math.abs(dx) > aw || Math.abs(dy) > ah) {
-                    continue
-                }
-
-                if (Math.abs(dx / blocks[i].width) > Math.abs(dy / blocks[i].height)) {
-
-                    if (dx < 0) {
-                        rect.x = blocks[i].x - rect.width;// left
-                        rect.directionX = 0;
-                        continue
-                    }
-                    else {
-                        rect.x = blocks[i].x + blocks[i].width; // right
-                        rect.directionX = 1;
-                        continue
-                    }
-
-                } else {
-
-                    if (dy < 0) {
-                        rect.y = blocks[i].y - rect.height; // top
-                        if (rect.velY > 0) {
-                            rect.velY = 0;
-                        }
-                        rect.directionY = 0;
-                        continue
-                    }
-                    else {
-                        rect.y = blocks[i].y + blocks[i].height; // bottom
-                        if (rect.velY < -0.5) {
-                            rect.velY = -0.5;
-                        }
-                        rect.directionY = 1;
-                        continue
-                    }
-
-                }
-            }
-        }
 
         function limitSpeed(rect) {
 
@@ -343,28 +222,27 @@
 
         function resetObjectIfOutsideMap(rect) {
 
-            if (rect.x > canvas.width + rect.width) {
+            if (rect.x > canvas.width + rect.width + 200) {
                 rect.y = canvas.height / 2;
                 rect.x = canvas.width / 2;
             }
 
-            if (rect.x < 0 - rect.width) {
+            if (rect.x < 0 - rect.width - 200) {
                 rect.y = canvas.height / 2;
                 rect.x = canvas.width / 2;
             }
 
-            if (rect.y > canvas.height + rect.height) {
+            if (rect.y > canvas.height + rect.height + 200) {
                 rect.y = canvas.height / 2;
                 rect.x = canvas.width / 2;
             }
 
-            if (rect.y < 0 - rect.height) {
+            if (rect.y < 0 - rect.height - 200) {
                 rect.y = canvas.height / 2;
                 rect.x = canvas.width / 2;
             }
 
         }
-
 
         function loseVel(rect) {
             if (rect.velY > 0) {
@@ -375,21 +253,13 @@
                 rect.velY += 0.01;
             }
 
-            if (rect.velX > 0) {
-                rect.velX -= 0.01;
-            }
-
-            if (rect.velX < 0) {
-                rect.velX += 0.01;
-            }
-
         }
-
 
         canvas.onmousemove = function (e) {
             selectedBlock = document.getElementById("placeBlockType").selectedIndex
             placeBlockSizeWidth = parseInt(document.getElementById("placeBlockSizeWidth").value)
             placeBlockSizeHeight = parseInt(document.getElementById("placeBlockSizeHeight").value)
+            levelNumber = parseInt(document.getElementById("levelNumber").value)
             mouseX = e.pageX - canvas.offsetLeft - (placeBlockSizeWidth / 2);
             mouseY = e.pageY - canvas.offsetTop - (placeBlockSizeHeight / 2);
         };
@@ -415,7 +285,45 @@
                 document.getElementById("level").innerHTML += "bounceBlocks.push(new create_bounceBlocks(" + mouseX + ", " + mouseY + ", " + placeBlockSizeWidth + ", " + placeBlockSizeHeight + ", 1, 1));\n"
             }
 
+            if (selectedBlock == 4) {
+                triggerBlocks.push(new create_trigger(mouseX, mouseY, placeBlockSizeWidth, placeBlockSizeHeight, "level", levelNumber));
+                document.getElementById("level").innerHTML += "triggerBlocks.push(new create_trigger(" + mouseX + ", " + mouseY + ", " + placeBlockSizeWidth + ", " + placeBlockSizeHeight + ", \"level\", " + levelNumber + "));\n"
+            }
+
         };
+
+
+    function goToLevel(levelNumber) {
+        debugger;
+            for (var i = 0; i < blocks.length; i++) {
+                blocks.splice(i, 1);
+            }
+            for (var i = 0; i < bounceBlocks.length; i++) {
+                bounceBlocks.splice(i, 1);
+            }
+            for (var i = 0; i < playerBlocks.length; i++) {
+                playerBlocks.splice(i, 1);
+            }
+            for (var i = 0; i < triggerBlocks.length; i++) {
+                triggerBlocks.splice(i, 1);
+            }
+
+
+            if (levelNumber == 1) {
+                playerBlocks.push(new create_player(70, canvas.height - 100));
+                blocks.push(new create_block(0, canvas.width - 50, canvas.width, 50));
+
+            }
+
+            if (levelNumber == 2) {
+                playerBlocks.push(new create_player(300, canvas.height - 100));
+                blocks.push(new create_block(0, canvas.width - 50, canvas.width, 50));
+
+            }
+            return true;
+        }
+        goToLevel(1);
+
 
     </script>
     <textarea id="level"></textarea>
@@ -426,9 +334,12 @@
             <option value="bounceVertical">bounceVertical</option>
             <option value="bounceHorizontal">bounceHorizontal</option>
             <option value="bounceBoth">bounceBoth</option>
+            <option value="goToLevel">goToLevel</option>
         </select><br />
         <h5 style="margin:0;">Size</h5>
         <input id="placeBlockSizeWidth" value="50" /> x <input id="placeBlockSizeHeight" value="50" />
+        <h5 style="margin:0;">Only used for goToLevel-trigger</h5>
+        <input id="levelNumber" value="1" />
         <br /><br />
         <h5 style="margin:0;">Move with arrowkeys</h5>
         <h5 style="margin:0;">Jump with Space/up arrowkey</h5>
