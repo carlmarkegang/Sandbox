@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<body style="background-color:black;padding:0px;margin:0px;overflow:hidden;cursor: pointer;"
+  onclick="location.reload();">
+  <canvas id="canvas"></canvas>
+
+  <script>
+    function randomIntFromInterval(min, max) { // min and max included 
+      return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    var points = [];
+    var circleSize = randomIntFromInterval(1, 10);
+    var heightPos = (innerHeight / 2);
+    var pointAmount = randomIntFromInterval(11, 100);
+    var mouseX = 0;
+    var mouseY = 0;
+    var color = "rgb(" + randomIntFromInterval(20, 255) + "," + randomIntFromInterval(20, 255) + "," + randomIntFromInterval(20, 255) + ")";
+
+    function create_point(x, y, circleSize) {
+      this.x = x;
+      this.y = y;
+      this.circleSize = circleSize;
+      this.randomY = 0;
+    }
+
+    for (let i = 0; i < pointAmount; i++) {
+      points.push(new create_point(((innerWidth / pointAmount) * i * 1.1), heightPos, circleSize, "red"));
+    }
+
+    function draw() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < points.length; i++) {
+        points[i].randomY = randomIntFromInterval(-200, 200);
+        ctx.beginPath();
+
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+
+        if (i > 0) {
+          ctx.moveTo(points[i - 1].x, points[i - 1].y + points[i - 1].randomY);
+        } else {
+          ctx.moveTo(-500, -100);
+        }
+        ctx.lineTo(points[i].x, points[i].y + points[i].randomY);
+        ctx.stroke();
+
+
+        ctx.beginPath();
+        ctx.arc(points[i].x, points[i].y + points[i].randomY, points[i].circleSize, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+    }
+
+    setInterval(function () { draw(); }, 1000);
+  </script>
+
+</body>
+
+</html>
